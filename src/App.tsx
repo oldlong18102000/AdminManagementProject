@@ -1,46 +1,43 @@
-import React, { useState } from 'react';
-import logo from './logo.svg';
+import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Dashboard from './modules/common/components/DashBoard/dashboard';
-import Preferences from './modules/common/components/Preferences/preferences';
-import SignUp from './modules/auth/signup/signup';
-import Login from './modules/auth/login/login';
-import useToken from './ultis/useToken';
+import { useDispatch, useSelector } from 'react-redux';
+import { ThunkDispatch } from 'redux-thunk';
+import { AppState } from './redux/reducer';
+import { Action } from 'typesafe-actions';
+import Cookies from 'js-cookie';
+import { ACCESS_TOKEN_KEY } from './ultis/constants';
+import { API_PATHS } from './configs/api';
+import { fetchThunk } from './modules/common/redux/thunk';
+import { RESPONSE_STATUS_SUCCESS } from './ultis/httpResponseCode';
+import { setUserInfo } from './modules/auth/redux/authReducer';
+import { Routes } from './Routes';
 
 
 function App() {
-  const { token, setToken } = useToken();
-  const clearToken = () => {
-    setToken(0);
-    localStorage.clear();
-  }
+  const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
+  const { user } = useSelector((state: AppState) => ({
+    user: state.profile.user,
+  }));
 
-  if (!token) {
-    return (
+  const getProfile = useCallback(async () => {
+    const accessToken = Cookies.get(ACCESS_TOKEN_KEY);
 
-      <Routes>
-        <Route path="/sign-up" element={<SignUp setToken={setToken} />} />
-        <Route path="/login" element={<Login setToken={setToken} />} />
-        <Route path="/" element={<Login setToken={setToken} />} />
-      </Routes>
+    if (accessToken && !user) {
+      const json = await dispatch(fetchThunk(API_PATHS.userProfile));
+      if (json?.code === RESPONSE_STATUS_SUCCESS) {
+        dispatch(setUserInfo({ ...json.data, token: accessToken }));
+      }
+    }
+  }, [dispatch, user]);
 
-    )
-    //<Login setToken={setToken} />
-  }
+  useEffect(() => {
+    getProfile();
+  }, [getProfile]);
 
   return (
-    <div className="wrapper">
-      <h1>Application</h1>
-      <button onClick={clearToken}>Exit</button>
-
-      <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/preferences" element={<Preferences />} />
-        <Route path="/" element={<Preferences />} />
-      </Routes>
-
-    </div>
+    <>
+      <Routes />
+    </>
   );
 }
 

@@ -6,7 +6,7 @@ export interface AuthState {
   user?: IUser;
 }
 
-export const setAuthorization: any = createCustomAction('auth/setAuthorization', (data: AuthToken) => ({
+export const setAuthorization = createCustomAction('auth/setAuthorization', (data: AuthToken) => ({
   data,
 }));
 
