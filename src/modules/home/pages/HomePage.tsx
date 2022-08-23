@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux';
 import { ROUTES } from '../../../configs/routes';
 import '../../../scss/HomePage.scss';
 import { ACCESS_TOKEN_KEY } from '../../../ultis/constants';
-import ContactPage from './ContactPage';
 
 interface Props { }
 
@@ -84,7 +83,6 @@ const HomePage = (props: Props) => {
         </a>
       </div>
     </div>
-    {/* <ContactPage></ContactPage> */}
   </div>
 };
 

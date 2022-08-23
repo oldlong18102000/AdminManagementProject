@@ -1,20 +1,17 @@
 import React, { useState } from 'react';
 import SignUpForm from '../components/SignUpForm';
-import { ISignUpParams } from '../../../models/auth';
 import { useDispatch } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { AppState } from '../../../redux/reducer';
 import { Action } from 'redux';
-import { fetchThunk } from '../../common/redux/thunk';
-import { API_PATHS } from '../../../configs/api';
-import { setUserInfo } from '../redux/authReducer';
-import Cookies from 'js-cookie';
+import '../../../scss/login.css';
 import { ROUTES } from '../../../configs/routes';
 import { push, replace } from 'connected-react-router';
 import { useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { RESPONSE_STATUS_SUCCESS } from '../../../ultis/httpResponseCode';
 import { getErrorMessageResponse } from '../../../ultis';
+import { fetchAPIgetLocation, fetchAPIgetState, fetchAPIsignUp } from '../redux/Action';
+import { ISignUpParams } from '../model/SignUpModel';
 
 const SignUpPage = () => {
     const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
@@ -25,13 +22,7 @@ const SignUpPage = () => {
     const [states, setState] = useState([]);
 
     const getLocation = React.useCallback(async () => {
-
-        const json = await dispatch(fetchThunk(API_PATHS.getLocation, 'get'));
-
-        if (json?.code === RESPONSE_STATUS_SUCCESS) {
-            setLocations(json.data);
-            return;
-        }
+        const json = await dispatch(fetchAPIgetLocation(setLocations));
     }, []);
 
     useEffect(() => { getLocation() }, [getLocation]);
@@ -39,20 +30,7 @@ const SignUpPage = () => {
     const onSignUp = React.useCallback(
         async (values: ISignUpParams) => {
             setErrorMessage('');
-            setLoading(true);
-
-            const json = await dispatch(
-                fetchThunk(API_PATHS.signUp, 'post', values),
-            );
-
-            setLoading(false);
-
-            if (json?.code === RESPONSE_STATUS_SUCCESS) {
-                alert('Chúc mừng bạn đăng ký thành công')
-                dispatch(replace(ROUTES.login));
-                return;
-            }
-
+            const json = dispatch(fetchAPIsignUp(values, setLoading))
             setErrorMessage(getErrorMessageResponse(json));
         },
         [dispatch]);
@@ -64,31 +42,19 @@ const SignUpPage = () => {
     const getState = React.useCallback(async () => {
         //setLoading(true);
         if (id) {
-            const json = await dispatch(fetchThunk(`${API_PATHS.getStateByLocation}${id}`, 'get'));
-            console.log(`${API_PATHS.getStateByLocation}${id}`);
-
+            const json = await dispatch(fetchAPIgetState(id, setState));
+            //console.log(`${API_PATHS.getStateByLocation}${id}`);
             //setLoading(false);
-            if (json?.code === RESPONSE_STATUS_SUCCESS) {
-                setState(json.data);
-                return;
-            }
         }
     }, [id]);
 
     useEffect(() => { getState(); }, [id]);
 
+    const NavigateLogin = () => {
+        dispatch(replace(ROUTES.login));
+    }
     return (
-        <div
-            className="container"
-            style={{
-                height: 'auto',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-            }}
-        >
-
+        <div className="container display-container">
             <SignUpForm
                 onStates={handleState}
                 onSignUp={onSignUp}
@@ -98,7 +64,7 @@ const SignUpPage = () => {
                 states={states}
             />
             Bạn đã có tài khoản?
-            <a onClick={() => dispatch(replace(ROUTES.login))} style={{ cursor: 'pointer', color: '#0d6efd', textDecoration: 'underline' }}>
+            <a className="NavigateAuth" onClick={NavigateLogin}>
                 <FormattedMessage id="loginnow" />
             </a>
         </div>

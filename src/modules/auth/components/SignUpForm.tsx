@@ -1,30 +1,10 @@
 import { locationsAreEqual } from 'history';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { ISignUpParams, ISignUpValidation, IGenderParams, ILocationParams } from '../../../models/auth';
 import { validateSignup, validSignup } from '../utils';
 import { useEffect } from 'react';
-
-interface Props {
-    loading: boolean;
-    errorMessage: string;
-    locations: Array<ILocationParams>;
-    states: Array<ILocationParams>;
-    onStates(value: any): any;
-    onSignUp(values: ISignUpParams): void;
-}
-
-const GENDERS = [
-    {
-        label: 'Nam',
-        value: 'Male'
-    },
-    {
-        label: 'Nữ',
-        value: 'FeMale'
-    }
-
-]
+import { IGenderParams, ILocationParams, ISignUpParams, ISignUpValidation, Props } from '../model/SignUpModel';
+import { GENDERS } from '../../../ultis/constants';
 
 const SignUpForm = (props: Props) => {
     const { onSignUp, onStates, loading, errorMessage, locations, states } = props;
@@ -98,17 +78,16 @@ const SignUpForm = (props: Props) => {
 
     return (
         <form
+            className="row g-3 needs-validation maxWidthFormLogin"
             autoComplete='off'
-            style={{ maxWidth: '560px', width: '100%' }}
             noValidate
             onSubmit={(e) => {
                 e.preventDefault();
                 onSubmit();
             }}
-            className="row g-3 needs-validation"
         >
             {!!errorMessage && (
-                <div className="alert alert-danger" role="alert" style={{ width: '100%' }}>
+                <div className="alert alert-danger w100" role="alert">
                     {<FormattedMessage id={errorMessage} />}
                 </div>
             )}
@@ -252,12 +231,11 @@ const SignUpForm = (props: Props) => {
                 )}
             </div>
 
-            <div className="row justify-content-md-center" style={{ margin: '16px 0' }}>
+            <div className="row justify-content-md-center mg-16-0">
                 <div className="col-md-auto">
                     <button
-                        className="btn btn-primary"
+                        className="btn btn-primary authButton"
                         type="submit"
-                        style={{ minWidth: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         disabled={loading}
                     >
                         {loading && <div className="spinner-border spinner-border-sm text-light mr-2" role="status" />}

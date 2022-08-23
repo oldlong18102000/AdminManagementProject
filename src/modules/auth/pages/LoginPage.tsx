@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
 import LoginForm from '../components/LoginForm';
-import { ILoginParams } from '../../../models/auth';
 import { useDispatch } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { AppState } from '../../../redux/reducer';
 import { Action } from 'redux';
-import { fetchThunk } from '../../common/redux/thunk';
-import { API_PATHS } from '../../../configs/api';
-import { setUserInfo } from '../redux/authReducer';
-import Cookies from 'js-cookie';
+import '../../../scss/login.css';
 import { ROUTES } from '../../../configs/routes';
 import { push, replace } from 'connected-react-router';
 import { FormattedMessage } from 'react-intl';
-import { moveCursor } from 'readline';
-import { RESPONSE_STATUS_SUCCESS } from '../../../ultis/httpResponseCode';
-import { ACCESS_TOKEN_KEY } from '../../../ultis/constants';
 import { getErrorMessageResponse } from '../../../ultis';
+import { fetchAPIsignIn } from '../redux/Action';
+import { ILoginParams } from '../model/LoginModel';
+import { RESPONSE_STATUS_UNAUTHORIZED } from '../../../ultis/httpResponseCode';
 
 const LoginPage = () => {
   const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
@@ -25,41 +21,28 @@ const LoginPage = () => {
   const onLogin = React.useCallback(
     async (values: ILoginParams) => {
       setErrorMessage('');
-      setLoading(true);
-
-      const json = await dispatch(
-        fetchThunk(API_PATHS.signIn, 'post', { email: values.email, password: values.password }),
-      );
-
-      setLoading(false);
-
-      if (json?.code === RESPONSE_STATUS_SUCCESS) {
-        dispatch(setUserInfo(json.data));
-        Cookies.set(ACCESS_TOKEN_KEY, json.data.token, { expires: values.rememberMe ? 7 : undefined });
-        dispatch(replace(ROUTES.home));
-        return;
+      try {
+        const json = await dispatch(fetchAPIsignIn(values, setLoading))
+        if (json.success === RESPONSE_STATUS_UNAUTHORIZED) {
+          setErrorMessage(getErrorMessageResponse(json.errors));
+        }
+      } catch (error: any) {
+        // console.log(error)
+        //setErrorMessage(getErrorMessageResponse(error.response.data));
       }
-
-      setErrorMessage(getErrorMessageResponse(json));
     },
     [dispatch],
   );
 
+  const NavigateSignUp = () => {
+    dispatch(replace(ROUTES.login));
+  }
   return (
-    <div
-      className="container"
-      style={{
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-      }}
-    >
+    <div className="container display-container">
 
       <LoginForm onLogin={onLogin} loading={loading} errorMessage={errorMessage} />
       Bạn chưa có tài khoản?
-      <a onClick={() => dispatch(replace(ROUTES.signUp))} style={{ cursor: 'pointer', color: '#0d6efd', textDecoration: 'underline' }}>
+      <a className="NavigateAuth" onClick={NavigateSignUp}>
         <FormattedMessage id='register' />
       </a>
     </div>

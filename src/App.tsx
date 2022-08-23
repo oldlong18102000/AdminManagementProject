@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import './App.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
@@ -9,8 +9,8 @@ import { ACCESS_TOKEN_KEY } from './ultis/constants';
 import { API_PATHS } from './configs/api';
 import { fetchThunk } from './modules/common/redux/thunk';
 import { RESPONSE_STATUS_SUCCESS } from './ultis/httpResponseCode';
-import { setUserInfo } from './modules/auth/redux/authReducer';
 import { Routes } from './Routes';
+import { setUserInfo } from './modules/auth/redux/Action';
 
 
 function App() {

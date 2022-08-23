@@ -1,5 +1,6 @@
-import { ILoginParams, ILoginValidation, ISignUpParams, ISignUpValidation } from '../../models/auth';
 import { validEmailRegex } from '../../ultis';
+import { ILoginParams, ILoginValidation } from './model/LoginModel';
+import { ISignUpParams, ISignUpValidation } from './model/SignUpModel';
 
 const validateEmail = (email: string) => {
   if (!email) {

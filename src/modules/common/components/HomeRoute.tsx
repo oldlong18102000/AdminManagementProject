@@ -14,7 +14,7 @@ const HomeRoute = (props: Props) => {
         return (
             <Redirect
                 to={{
-                    pathname: ROUTES.home,
+                    pathname: ROUTES.productTable,
                 }}
             />
         );

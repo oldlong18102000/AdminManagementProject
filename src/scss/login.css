@@ -3,3 +3,43 @@
     flex-direction: column;
     align-items: center;
 }
+
+.display-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.NavigateAuth {
+    cursor: pointer;
+    color: #0d6efd;
+    text-decoration: underline;
+}
+
+.maxWidthFormLogin {
+    max-width: 560px;
+    width: 100%;
+}
+
+.w100 {
+    width: 100%;
+}
+
+.authButton {
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mg-16-0 {
+    margin: 16px 0;
+}
+
+.errorMsg {
+    max-width: 100%;
+    font-size: 0.875rem;
+    color: #DC3545;
+}

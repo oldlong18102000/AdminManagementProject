@@ -8,6 +8,14 @@
     display: flex;
 }
 
+.display-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
 .item {
     //background: blue;
     margin-top: 10px;
