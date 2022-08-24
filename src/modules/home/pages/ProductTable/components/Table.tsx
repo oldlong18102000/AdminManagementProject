@@ -33,7 +33,7 @@ function Table(props: Props) {
                             <td><a className='link' title={`${item.vendor}`} href='#'>{item.vendor}</a></td>
                             <td>{item.arrivalDate !== '0' ? new Date(+item.arrivalDate * 1000).toLocaleString("en-ZA", { month: "short", day: "numeric", year: "numeric" }) : '--'}</td>
                             <td>
-                                <button className='btn-default' onClick={handleSetDeleteList}>
+                                <button className='btn-default' onClick={() => handleSetDeleteList(item.id)}>
                                     <i className="fa-solid fa-trash"></i>
                                 </button>
                             </td>

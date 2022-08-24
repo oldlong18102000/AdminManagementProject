@@ -48,3 +48,13 @@ export interface Props {
     ProductList: Array<IProductTableParams>;
     handleSetDeleteList(e: any): void;
 }
+
+export interface PropsModalConfirm {
+    show: Boolean,
+    handleClose: void,
+    dataProductDelete: Array<String>,
+    handleOpacity: void,
+    setDataProductDelete: void,
+    handleFetchData: void,
+    setDataDeleteLength: void
+}

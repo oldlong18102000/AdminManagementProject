@@ -1,20 +1,24 @@
 import { Modal, Button } from 'react-bootstrap'
+import { PropsModalConfirm } from '../model/ProductTableModel'
 import axios from "axios";
+import ThunkDispatch from 'redux-thunk';
+import { deleteProductDataAPI } from '../redux/Action';
 
 
 const ModalConfirm = (props) => {
-    const { show, handleClose, dataProductDelete, handleOpacity, setDataProductDelete, handleFetchData, setDataDeleteLength } = props;
+
+    const { show, handleClose, dataProductDelete, handleOpacity, setDataProductDelete, handleFetchData, setDataDeleteLength, dispatch } = props;
 
     const deleteProductData = async () => {
-        //const res = await axios.post
         console.log(dataProductDelete)
-        const res = await axios.post("https://api.gearfocus.div4.pgtest.co/apiAdmin/products/edit",
-            `{"params":[${dataProductDelete.map((item) => { return (`{"id":"${item}","delete":1}`) })}]}`,
-            {
-                headers: {
-                    Authorization: '9.5a8eefea2a1299f87e8e1a74994827840debf897a605c603444091fa519da275',
-                }
-            })
+        // const res = await axios.post("https://api.gearfocus.div4.pgtest.co/apiAdmin/products/edit",
+        //     `{"params":[${dataProductDelete.map((item) => { return (`{"id":"${item}","delete":1}`) })}]}`,
+        //     {
+        //         headers: {
+        //             Authorization: '9.5a8eefea2a1299f87e8e1a74994827840debf897a605c603444091fa519da275',
+        //         }
+        //     })
+        const json = await dispatch(deleteProductDataAPI(dataProductDelete))
         console.log(dataProductDelete)
         handleOpacity(dataProductDelete)
         handleFetchData()

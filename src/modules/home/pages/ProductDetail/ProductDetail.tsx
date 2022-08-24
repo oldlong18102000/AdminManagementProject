@@ -48,35 +48,13 @@ const DetailProduct = () => {
     const [Vendor, setVendor] = useState("");
     const [ProductTitle, setProductTitle] = useState("");
     //const [Brand, SetBrand] = useState("");
-    const [Condition, setCondition] = useState("292");
-    const [SKU, setSKU] = useState(initSku);
     const [Ima, setIma] = useState([]);
     const [Category, SetCategory] = useState([{ category_id: "", name: "" }]);
     const [CategoryName, SetCategoryName] = useState([]);
-    const [Description, setDescription] = useState("");
     const [editorState, setEditorState] = useState(EditorState.createEmpty());
-
-
-    const [Avai4Sale, setAvai4Sale] = useState(1);
-    const [Memberships, setMemberships] = useState([]);
-    const [TaxExempt, setTaxExempt] = useState(0);
-    const [ArrivalDate, setArrivalDate] = useState("165000000");
     const [Shipping, setShipping] = useState([{ id: "1", price: "0.00", }]);
 
     const [Country, SetCountry] = useState("");
-    const [Price, SetPrice] = useState(0);
-    const [ParticipateSale, SetParticipateSale] = useState(0);
-    const [SalePrice, SetSalePrice] = useState("0.0000");
-    const [OgTtagsType, setOgTtagsType] = useState("0");
-    const [OgTags, SetOgTags] = useState("");
-    const [MetaDescType, SetMetaDescType] = useState("A");
-    const [MetaDescription, SetMetaDescription] = useState("");
-    const [MetaKeywords, SetMetaKeywords] = useState("");
-    const [ProductPageTitle, SetProductPageTitle] = useState("");
-    const [FacebookMarketingEnabled, SetFacebookMarketingEnabled] = useState(true);
-    const [GoogleFeedEnabled, SetGoogleFeedEnabled] = useState(true);
-
-    const [Quantity, SetQuantity] = useState(0);
     const dataDeleteLength = 1;
 
     const listVendors = useSelector((state: AppState) => (state.services.vendorlist));
@@ -84,20 +62,7 @@ const DetailProduct = () => {
     const listBrands = useSelector((state: AppState) => (state.services.brandlist));
     const listCountries = useSelector((state: AppState) => (state.services.countrylist));
 
-    // const loadOptions = async (inputText, callback) => {
-    //     const res = await axios.post("https://api.gearfocus.div4.pgtest.co/apiAdmin/vendors/list",
-    //         { search: `${inputText}` }
-    //         ,
-    //         {
-    //             headers: {
-    //                 Authorization: '9.5a8eefea2a1299f87e8e1a74994827840debf897a605c603444091fa519da275',
-    //             }
 
-    //         }
-    //     );
-    //     const data = res.data && res.data.data ? res.data.data : []
-    //     callback(data.map(i => ({ id: i.id, name: i.name })));
-    // }
 
     const [state, setState] = useState({
         ProductTitle: "",
@@ -168,27 +133,6 @@ const DetailProduct = () => {
             FacebookMarketingEnabled: +datas.facebook_marketing_enabled,
             GoogleFeedEnabled: +datas.google_feed_enabled,
         }))
-        //SetBrand(datas.brand_id)
-        //setEditorState(EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(datas.description).contentBlocks)));
-        //setSKU(+datas.sku)
-        //SetCategory(datas.categories)
-        //setArrivalDate(datas.arrival_date)
-        //setAvai4Sale(+datas.enabled)
-        //Prices & Inventory
-        //setTaxExempt(+datas.tax_exempt)
-        //SetPrice(+datas.price)
-        //SetQuantity(+datas.quantity)
-        //Shipping
-        //setShipping(datas.shipping)
-        //Marketing
-        //setOgTtagsType(datas.og_tags_type)
-        //SetOgTags(datas.og_tags)
-        //SetMetaDescType(datas.meta_desc_type)
-        //SetMetaDescription(datas.meta_description)
-        //SetMetaKeywords(datas.meta_keywords)
-        //SetProductPageTitle(datas.product_page_title)
-        //SetFacebookMarketingEnabled(Boolean(datas.facebook_marketing_enabled))
-        //SetGoogleFeedEnabled(Boolean(datas.google_feed_enabled))
     }
 
     useEffect(() => {

@@ -6,7 +6,7 @@ import { Action, createCustomAction } from 'typesafe-actions';
 import { API_PATHS } from '../../../../../configs/api';
 import { ROUTES } from '../../../../../configs/routes';
 import { AppState } from '../../../../../redux/reducer';
-import { ACCESS_TOKEN_KEY } from '../../../../../ultis/constants';
+import { ACCESS_TOKEN_KEY, APIHostConst } from '../../../../../ultis/constants';
 import { RESPONSE_STATUS_SUCCESS } from '../../../../../ultis/httpResponseCode';
 import { setUserInfo } from '../../../../auth/redux/Action';
 import { axiosThunk } from '../../../../common/redux/thunk';
@@ -30,5 +30,17 @@ export const fetchProductData = (values: IProductFilterParams) => {
         }
         const json = await dispatch(axiosThunk(API_PATHS.getProductListData, 'post', obj));
         return json;
+    };
+};
+
+// API Delete Product Data
+export const deleteProductDataAPI = (arr: Array<String>) => {
+    return async (dispatch: ThunkDispatch<AppState, null, Action<string>>) => {
+        const obj = {
+            params: arr.map((item) => { return ({ id: item, delete: 1 }) })
+        }
+        console.log("obj", obj)
+        const json = await dispatch(axiosThunk(APIHostConst + API_PATHS.deleteProductData, 'post', obj));
+
     };
 };

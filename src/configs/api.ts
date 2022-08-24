@@ -6,6 +6,7 @@ enum APIService {
   public,
   public2,
   product,
+  deleteProduct,
   productDetail,
 }
 
@@ -21,6 +22,8 @@ function getBaseUrl(service: APIService) {
   } else if (service === APIService.product) {
     return `${APIHost}/products`;
   } else if (service === APIService.productDetail) {
+    return `${APIHost2}/products`;
+  } else if (service === APIService.deleteProduct) {
     return `${APIHost2}/products`;
   }
 
@@ -39,4 +42,5 @@ export const API_PATHS = {
   getStateByLocation: `${getBaseUrl(APIService.public)}/location?pid=`,
   getProductListData: `${getBaseUrl(APIService.product)}/list`,
   getProductDetailData: `${getBaseUrl(APIService.productDetail)}/detail`,
+  deleteProductData: `${getBaseUrl(APIService.deleteProduct)}/edit`,
 };
