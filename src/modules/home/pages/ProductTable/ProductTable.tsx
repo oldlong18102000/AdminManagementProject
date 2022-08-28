@@ -10,7 +10,7 @@ import { fetchProductData } from './redux/Action';
 import { ThunkDispatch } from 'redux-thunk';
 import { AppState } from '../../../../redux/reducer';
 import { Action } from 'redux';
-import { fetchAPIgetCategory, fetchAPIgetVendor, setVendor } from '../../../../services/Action';
+import { fetchAPIgetBrands, fetchAPIgetCategory, fetchAPIgetCountry, fetchAPIgetVendor, setVendor } from '../../../../services/Action';
 import Autocomplete from '@mui/material/Autocomplete';
 
 import Table from './components/Table';
@@ -52,6 +52,8 @@ const ProductTable = () => {
   useEffect(() => {
     dispatch(fetchAPIgetVendor());
     dispatch(fetchAPIgetCategory());
+    dispatch(fetchAPIgetBrands());
+    dispatch(fetchAPIgetCountry());
   }, [])
 
   const handleSetProductList = (data: any) => {

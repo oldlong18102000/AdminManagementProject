@@ -1,24 +1,26 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import moment from "moment";
 import { useDispatch, useSelector } from 'react-redux';
-import axios from "axios";
 import styles from './scss/NewProduct.module.css';
 import '../ProductTable/scss/TableProduct.css'
-import { Select, DatePicker, Tag } from 'antd';
 import 'antd/dist/antd.css';
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import AsyncSelect from 'react-select/async'
-//import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
 import draftToHtml from 'draftjs-to-html';
 import { EditorState, convertToRaw, ContentState, convertFromHTML } from "draft-js"
 import { AppState } from '../../../../redux/reducer';
-import { IProductDetailParams } from './model/ProductDetailModel';
+import { IListCategories, IListVendors, IProductDetailParams } from './model/ProductDetailModel';
 import { ThunkDispatch } from 'redux-thunk';
 import { Action } from 'typesafe-actions';
 import { fetchProductDetailData } from './redux/Action';
-//import ImageUpLoad from '../ImageUpLoad';
+import Autocomplete from '@mui/material/Autocomplete';
+import { Checkbox, TextField } from '@mui/material';
+import { DesktopDatePicker } from '@mui/x-date-pickers';
+import { OperationCanceledException, preProcessFile } from 'typescript';
+import { includes, map } from 'lodash';
+import { setCountry } from '../../../../services/Action';
+import { object } from 'yup';
 
 const initData = {
     ProductTitle: "",
@@ -43,9 +45,9 @@ const DetailProduct = () => {
 
 
 
-    const [inputValue, SetInputValue] = useState('');
     const [selectedValue, SetSelectedValue] = useState(null);
     const [Vendor, setVendor] = useState("");
+    const [inputValue, setInputValue] = useState<IListVendors | null>({ name: '', id: '', });
     const [ProductTitle, setProductTitle] = useState("");
     //const [Brand, SetBrand] = useState("");
     const [Ima, setIma] = useState([]);
@@ -53,8 +55,8 @@ const DetailProduct = () => {
     const [CategoryName, SetCategoryName] = useState([]);
     const [editorState, setEditorState] = useState(EditorState.createEmpty());
     const [Shipping, setShipping] = useState([{ id: "1", price: "0.00", }]);
-
-    const [Country, SetCountry] = useState("");
+    const [option, setOption] = useState('')
+    const [Country, SetCountry] = useState<string[]>([]);
     const dataDeleteLength = 1;
 
     const listVendors = useSelector((state: AppState) => (state.services.vendorlist));
@@ -62,21 +64,26 @@ const DetailProduct = () => {
     const listBrands = useSelector((state: AppState) => (state.services.brandlist));
     const listCountries = useSelector((state: AppState) => (state.services.countrylist));
 
-
+    const [imageList, setImageList] = useState<any[]>([])
 
     const [state, setState] = useState({
+        Vendor: "",
         ProductTitle: "",
         Brand: "",
         Condition: "292",
         editorState: EditorState.createEmpty(),
         SKU: initSku,
-        Category: [{ category_id: "", name: "" }],
-        ArrivalDate: "165000000",
+        imageList: [{ thumbs: '', file: [] as any[] }],
+        Category: [{ id: "", name: "" }],
+        ArrivalDate: 165000000,
         Avai4Sale: 1,
         TaxExempt: 0,
         Price: 0,
+        participate_sale: 0,
+        sale_price_type: '$',
+        sale_price: 0,
         Quantity: 0,
-        Shipping: [{ id: "1", price: "0.00", }],
+        Shipping: [{ id: "1", zone_name: "Continental U.S.", price: 0 }],
         OgTtagsType: "0",
         OgTags: "",
         MetaDescType: "A",
@@ -92,36 +99,40 @@ const DetailProduct = () => {
         const id = target.id;
         const value =
             target.type === "checkbox" ? Number(target.checked) : target.value;
-        console.log('hayyy', target.checked)
-        console.log('ko', target.id)
         setState((prevFields) => ({
             ...prevFields,
             [id]: value,
         }))
+        if (target.type === "checkbox" && id == 'participate_sale' && target.checked == false) {
+            setState((prevFields) => ({
+                ...prevFields,
+                sale_price: 0,
+            }))
+        }
     }
     const getProductDeltailData = async () => {
         const res = await dispatch(fetchProductDetailData(idProduct))
-        console.log("res", res)
         const datas = res.data
-        console.log(datas)
-        // Basic
         setVendor(datas.vendor_id)
-        //let filtered = listVendors.filter(item => item.id === datas.vendor_id);
-
-        //SetInputValue(filtered.map(item => item.name))
         setProductTitle(datas.name)
+        SetCountry(datas.shipping.map((val: any) => (val.zone_name)))
         setState((prevFields) => ({
             ...prevFields,
+            Vendor: datas.vendor_id,
             ProductTitle: datas.name,
             Brand: datas.brand_id,
             Condition: datas.condition_id,
             //editorState: EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(datas.description).contentBlocks)),
             SKU: +datas.sku,
-            Category: datas.categories,
-            ArrivalDate: datas.arrival_date,
+            imageList: datas.images,
+            Category: datas.categories.map((val: any) => ({ id: val.category_id, name: val.name })),
+            ArrivalDate: +datas.arrival_date * 1000,
             Avai4Sale: +datas.enabled,
             TaxExempt: +datas.tax_exempt,
             Price: +datas.price,
+            participate_sale: +datas.participate_sale,
+            sale_price_type: datas.sale_price_type,
+            sale_price: datas.sale_price,
             Quantity: +datas.quantity,
             Shipping: datas.shipping,
             OgTtagsType: datas.og_tags_type,
@@ -133,6 +144,15 @@ const DetailProduct = () => {
             FacebookMarketingEnabled: +datas.facebook_marketing_enabled,
             GoogleFeedEnabled: +datas.google_feed_enabled,
         }))
+        let initialvalue = listVendors.filter(function (item) {
+            return item.id == datas.vendor_id
+        })
+        if (initialvalue[0]) {
+            setInputValue(Object.assign({}, initialvalue[0]))
+        }
+        console.log('@@', datas.categories.map((val: any) => {
+            return val.name
+        }))
     }
 
     useEffect(() => {
@@ -143,6 +163,29 @@ const DetailProduct = () => {
         const index = String(num).indexOf('.', 0);
         const result = String(num).slice(0, index + n + 1);
         return result;
+    }
+
+    const handleOnChangeAutocomplete = (newValue: IListVendors) => {
+        setInputValue(newValue);
+        setVendor(newValue?.id ? newValue.id : "");
+    }
+
+
+    const handleChange = (newValue: Date | null) => {
+        //setValue(newValue);
+        setState((prevFields) => ({
+            ...prevFields,
+            ArrivalDate: newValue!.getTime(),
+        }))
+        console.log("@@", newValue!.toLocaleString("fr-CA", { month: "numeric", day: "numeric", year: "numeric" }))
+    };
+
+    const handleAddShipping = () => {
+        // setState((prevFields) => (
+        //     { ...prevFields, Shipping: [...prevFields.Shipping, {}] }
+        // ))
+        SetCountry([...Country, option]);
+        setOption('');
     }
 
     return (
@@ -159,26 +202,29 @@ const DetailProduct = () => {
                     <label className={` ${styles.col_md_2}`}>Vendor<span className={`${styles.text_danger}`}>*</span></label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <AsyncSelect
-                                cacheOptions
-                                defaultOptions
-                                value={selectedValue}
-                                // getOptionLabel={e => e.name}
-                                // getOptionValue={e => setVendor(e.id)}
-                                // loadOptions={loadOptions}
-                                onChange={e => SetSelectedValue(e)}
-                                onInputChange={e => SetInputValue(e)}
-                                placeholder={inputValue}
-                                theme={(theme) => ({
-                                    ...theme,
-                                    borderRadius: 0,
-                                    colors: {
-                                        ...theme.colors,
-                                        primary25: '#c8c8c8',
+                            <Autocomplete
+                                disablePortal
+                                options={listVendors}
+                                value={inputValue}
+                                onChange={(event, newValue) => handleOnChangeAutocomplete(newValue!)}
+                                sx={{
+                                    display: 'inline-block',
+                                    '& input': {
+                                        width: 500,
+                                        bgcolor: 'background.paper',
+                                        color: (theme) =>
+                                            theme.palette.getContrastText(theme.palette.background.paper),
                                     },
-                                })}
+                                }}
+                                style={{ "width": '384.53px' }}
+                                getOptionLabel={(option) => option.name}
+                                renderInput={(params) => (
+                                    <div ref={params.InputProps.ref}>
+                                        <input type="text" {...params.inputProps} />
+                                    </div>
+                                )}
                             />
-                            {Vendor === '' ?
+                            {inputValue === null ?
                                 <div className={`${styles.small} ${styles.error_message}`}>This field is required</div>
                                 : null}
                         </div>
@@ -238,7 +284,17 @@ const DetailProduct = () => {
                     <label className={` ${styles.col_md_2}`}>Images<span className={`${styles.text_danger}`}>*</span></label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            {/* <ImageUpLoad setIma={setIma} Ima={Ima} /> */}
+                            {state.imageList.map((file, index) => <img key={index} src={file.thumbs[0]} style={{ "width": "122px", "height": "122px" }} />)}
+                            {imageList.map((file, index) => <img key={index} src={URL.createObjectURL(file)} style={{ "width": "122px", "height": "122px" }} />)}
+                            <input type='file' multiple accept="image/*" onChange={(event) => {
+                                console.log(event.target.files);
+                                setImageList((prev) => {
+                                    if (event.target.files) {
+                                        return [...prev, ...Array.from(event.target.files)]
+                                    }
+                                    return [...prev];
+                                })
+                            }} />
                             <div className={`${styles.small} ${styles.error_message}`}>This field is required</div>
                         </div>
                     </div>
@@ -247,19 +303,31 @@ const DetailProduct = () => {
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
                     <label className={` ${styles.col_md_2}`}>Category<span className={`${styles.text_danger}`}>*</span></label>
                     <div className={` ${styles.col_md_6}`}>
-                        <div className={` ${styles.table_value}`}>
-                            <Select id="Category"
-                                mode="multiple"
-                                allowClear
-                                value={(state.Category)?.map(item => '----'.concat(item.name))}
-                                style={{ width: '100%', }}
-                                placeholder="Type Categories name to select"
-                            //onSelect={onchange}
-                            >
-                                {listCategories && listCategories.length > 0 && listCategories.map((item, index) => {
-                                    return (<Select.Option key={`category-${index}`} value={item.id} label={item.id}><Tag>----{item.name}</Tag></Select.Option>)
-                                })}
-                            </Select>
+                        <div className={` ${styles.table_value}`} style={{ "backgroundColor": "white" }}>
+                            <Autocomplete
+                                multiple
+                                id="tags-standard"
+                                options={listCategories}
+                                getOptionLabel={(option: any) => option.name}
+                                value={state.Category}
+                                freeSolo
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        color="primary"
+                                        variant="filled"
+                                    />
+                                )}
+                                onChange={(_: any, value: any) => {
+                                    setState(prev => {
+                                        return {
+                                            ...prev,
+                                            Category: value.map((val: any) => ({ id: val.id, name: val.name }))
+                                        }
+
+                                    })
+                                }}
+                            />
                         </div>
                     </div>
                     {Category === null ?
@@ -314,8 +382,24 @@ const DetailProduct = () => {
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
                     <label className={` ${styles.col_md_2}`}>Memberships</label>
                     <div className={` ${styles.col_md_4}`}>
-                        <div className={` ${styles.table_value}`}>
+                        <div className={` ${styles.table_value}`} style={{ "backgroundColor": "white" }}>
                             {/* <ReactMultiSelectCheckboxes options={[{ "id": 1, "value": "4", "label": "General" }]} onChange={e => setMemberships(...[], (e[0] ? [Number(e[0].value)] : []))} /> */}
+                            <Autocomplete
+                                multiple
+                                id="checkboxes-tags-demo"
+                                options={[{ "id": 1, "value": "4", "label": "General" }]}
+                                disableCloseOnSelect
+                                getOptionLabel={(option) => option.label}
+                                renderOption={(props, option, { selected }) => (
+                                    <li {...props}>
+                                        <Checkbox checked={selected} />
+                                        {option.label}
+                                    </li>
+                                )}
+                                renderInput={(params) => (
+                                    <TextField {...params} />
+                                )}
+                            />
                         </div>
                     </div>
                 </div>
@@ -333,15 +417,28 @@ const DetailProduct = () => {
                     <label className={` ${styles.col_md_2}`}>Price<span className={`${styles.text_danger}`}>*</span></label>
                     <label className={` ${styles.col_md_2}`} style={{ textAlign: 'left' }}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="number" id="Price" placeholder='0.00' onChange={onChange} value={take_decimal_number(state.Price, 2)}></input>
+                            <input type="number" min={0} id="Price" placeholder='0.00' onChange={onChange} value={take_decimal_number(state.Price, 2)}></input>
                             {state.Price <= 0 ?
                                 <div className={`${styles.small} ${styles.error_message}`}>This field must be greater than 0</div>
                                 : null}
                         </div>
                     </label>
-                    <label className={` ${styles.col_md_2}`} style={{ textAlign: 'left' }}>
-                        <input type="checkbox" name="tax_exempt" id="tax_exempt" />
+                    <label className={` ${styles.col_md_1}`} style={{ textAlign: 'left' }}>
+                        <input type="checkbox" id="participate_sale" checked={Boolean(state.participate_sale)} onChange={onChange} />
                         <label>Sale</label>
+                    </label>
+                    <label className={` ${styles.col_md_1}`} style={{ textAlign: 'left' }} hidden={state.participate_sale == 0}>
+                        <div className={` ${styles.table_value} ${styles.fitcontent}`}>
+                            <select name="sale_price_type" id="sale_price_type" onChange={onChange} value={state.sale_price_type}>
+                                <option value="$">$</option>
+                                <option value="%">%</option>
+                            </select>
+                        </div>
+                    </label>
+                    <label className={` ${styles.col_md_2}`} style={{ textAlign: 'left' }} hidden={state.participate_sale == 0}>
+                        <div className={` ${styles.table_value} ${styles.fitcontent}`}>
+                            <input type="number" min={0} id="sale_price" placeholder='0.00' onChange={onChange} value={state.sale_price}></input>
+                        </div>
                     </label>
                 </div>
                 {/* Arrival date */}
@@ -350,6 +447,14 @@ const DetailProduct = () => {
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
                             {/* <DatePicker value={moment(new Date(+ArrivalDate * 1000).toLocaleDateString())} format={"YYYY-MM-DD"} onChange={(value) => setArrivalDate(new Date(value).toLocaleString("fr-CA", { month: "numeric", day: "numeric", year: "numeric" }))}></DatePicker> */}
+                            <div >
+                                <DesktopDatePicker
+                                    inputFormat="yyy-MM-dd"
+                                    value={new Date(+state.ArrivalDate)}
+                                    onChange={handleChange}
+                                    renderInput={(params) => <TextField {...params} />}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -358,7 +463,7 @@ const DetailProduct = () => {
                     <label className={` ${styles.col_md_2}`}>Quantity in stock<span className={`${styles.text_danger}`}>*</span></label>
                     <label className={` ${styles.col_md_2}`} style={{ textAlign: 'left' }}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="number" id="Quantity" placeholder='0.00' onChange={onChange} value={state.Quantity}></input>
+                            <input type="number" min={0} id="Quantity" placeholder='0.00' onChange={onChange} value={state.Quantity}></input>
                         </div>
                     </label>
                 </div>
@@ -366,39 +471,46 @@ const DetailProduct = () => {
             </div>
             <div className={styles.part3}>
                 <h4 className={` ${styles.nb_theme_cosmic_h4} ${styles.my_3}`}>Shipping</h4>
-                {/* Shipping */}
-                <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
-                    <label className={` ${styles.col_md_2}`}>Continental U.S.<span className={`${styles.text_danger}`}>*</span></label>
-                    <div className={` ${styles.col_md_4}`}>
-                        <div className={` ${styles.table_value}`}>
-                            <input type="number" id='Shipping' placeholder='0.00' defaultValue={take_decimal_number(+Shipping.filter(item => item.id === '1')[0]?.price, 2)} onChange={e => setShipping(prevState => {
-                                const newState = prevState.map(obj => {
-                                    if (obj.id === "1") {
-                                        return { ...obj, price: `${e.target.value}` };
-                                    }
-                                    return obj;
-                                });
-
-                                return newState;
-
-                            })
-                            } autoComplete='off' maxLength={20}></input>
+                {state.Shipping && state.Shipping.length > 0 && state.Shipping.map((item, index) => {
+                    return (
+                        <div key={`country${index}`} className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
+                            <label className={` ${styles.col_md_2}`}>{item.zone_name}<span hidden={item.zone_name != 'Continental U.S.'} className={`${styles.text_danger}`}>*</span></label>
+                            <div className={` ${styles.col_md_4}`}>
+                                <div className={` ${styles.table_value}`}>
+                                    <input type="number" min={0} id='Shipping' value={take_decimal_number(item.price, 2)} placeholder='0.00' onChange={(e) =>
+                                        setState((prevFields) => (
+                                            {
+                                                ...prevFields,
+                                                Shipping: prevFields.Shipping.map(el => (el.zone_name == item.zone_name ? { ...el, price: +e.target.value } : el))
+                                            }
+                                        ))
+                                    }></input>
+                                </div>
+                            </div>
+                            <label className={` ${styles.pointer}`} hidden={item.zone_name == 'Continental U.S.'}
+                                onClick={() =>
+                                    setState((prevFields) => (
+                                        { ...prevFields, Shipping: prevFields.Shipping.filter(obj => { return obj.zone_name != item.zone_name }) }
+                                    ))}
+                            >Remove</label>
                         </div>
-                    </div>
-                </div>
+                    )
+                })}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
                     <label className={` ${styles.col_md_2}`}></label>
                     <div className={` ${styles.col_md_3}`}>
                         <div className={` ${styles.table_value}`}>
-                            <select name="country" id="country" onChange={e => SetCountry(e.target.value)}>
-                                <option value="0">Select new zone</option>
-                                {listCountries && listCountries.length > 0 && listCountries.map((item, index) => {
-                                    return (<option key={`country-${index}`} value={item.id}>{item.country}</option>)
+                            <select name="country" id="country" onChange={e => setOption(e.target.value)} value={option}>
+                                <option value="">Select new zone</option>
+                                {listCountries && listCountries.length > 0 && listCountries.filter(item => !state.Shipping.map(val => val.zone_name).includes(item.country)).map((item, index) => {
+                                    return (<option key={`country-${index}`} value={item.country}>{item.country}</option>)
                                 })}
                             </select>
                         </div>
                     </div>
-                    <label className={` ${styles.col_md_2}`}>Add Shipping Location</label>
+                    <label className={` ${styles.col_md_2} ${styles.pointer}`} onClick={() => option != '' &&
+                        setState((prevFieds) => ({ ...prevFieds, Shipping: [...prevFieds.Shipping, { id: listCountries.filter(oba => { return oba.country == option }).map(obj => obj.id).toString(), zone_name: option, price: 0.00, }] }))
+                    }>Add Shipping Location</label>
                 </div>
                 <div className={` ${styles.seperated_space}`}></div>
             </div>
@@ -417,7 +529,6 @@ const DetailProduct = () => {
                     </div>
                 </div>
                 {/* og_tags */}
-                {/* {!hidedenOgTag || OgTtagsType === '1' ? */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`} hidden={state.OgTtagsType === '0'}>
                     <label className={` ${styles.col_md_2}`}></label>
                     <div className={` ${styles.col_md_4}`}>
@@ -426,7 +537,6 @@ const DetailProduct = () => {
                         </div>
                     </div>
                 </div>
-                {/* : null} */}
                 {/* MetaDescType */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
                     <label className={` ${styles.col_md_2}`}>Meta description</label>
@@ -440,7 +550,6 @@ const DetailProduct = () => {
                     </div>
                 </div>
                 {/* MetaDescription */}
-                {/* {!hidedenMetaDescription || MetaDescType === 'C' ? */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`} hidden={state.MetaDescType === 'A'}>
                     <label className={` ${styles.col_md_2}`}></label>
                     <div className={` ${styles.col_md_4}`}>
@@ -449,7 +558,6 @@ const DetailProduct = () => {
                         </div>
                     </div>
                 </div>
-                {/* : null} */}
                 {/* MetaKeywords */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
                     <label className={` ${styles.col_md_2}`}>Meta keywords</label>
@@ -501,3 +609,16 @@ const DetailProduct = () => {
 }
 
 export default DetailProduct
+
+// defaultValue={take_decimal_number(+Shipping.filter(item => item.id === '1')[0]?.price, 2)} onChange={e => setShipping(prevState => {
+//     const newState = prevState.map(obj => {
+//         if (obj.id === "1") {
+//             return { ...obj, price: `${e.target.value}` };
+//         }
+//         return obj;
+//     });
+
+//     return newState;
+
+// })
+// } autoComplete='off' maxLength={20}>

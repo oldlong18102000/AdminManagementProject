@@ -38,6 +38,20 @@
   color: white;
 }
 
+.col_md_0 {
+  position: relative;
+  width: 100%;
+  padding: 4px 15px;
+}
+
+.col_md_1 {
+  flex: 0 0 8.333333335%;
+  max-width: 8.333333335%;
+  position: relative;
+  width: 100%;
+  padding: 4px 15px;
+}
+
 .col_md_2 {
   flex: 0 0 16.66666667%;
   max-width: 16.66666667%;
@@ -91,6 +105,10 @@
   padding: 7px 16px;
   font-size: 14px;
   color: black;
+}
+
+.fitcontent {
+  width: fit-content;
 }
 
 .table_value_editor {
@@ -149,6 +167,10 @@
 
 .help_block {
   color: #A8A8A8;
+}
+
+.pointer {
+  cursor: pointer;
 }
 
 .seperated_space {

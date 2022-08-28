@@ -512,3 +512,14 @@ input:checked+.slider:after {
 .pointer {
     cursor: pointer;
 }
+
+.MuiInputBase-root MuiFilledInput-root MuiFilledInput-underline MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-sl80c4-MuiInputBase-root-MuiFilledInput-root {
+    background-color: white;
+}
+
+
+.MuiFormControl-root {
+    background-color: #fff;
+    border-radius: 6px;
+    border-color: #fff;
+}

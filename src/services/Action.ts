@@ -43,7 +43,12 @@ export const fetchAPIgetVendor = () => {
                 Authorization: Cookies.get(ACCESS_TOKEN_KEY) || ''
             }
         }))
-        dispatch(setVendor(json.data));
+        dispatch(setVendor(json.data.map((val: any) => {
+            return {
+                id: val.id,
+                name: val.name
+            }
+        })));
         return json.data;
     };
 };
@@ -69,7 +74,12 @@ export const fetchAPIgetCountry = () => {
                 Authorization: Cookies.get(ACCESS_TOKEN_KEY) || ''
             }
         }))
-        dispatch(setCountry(json.data));
+        dispatch(setCountry(json.data.map((val: any) => {
+            return {
+                id: val.id,
+                country: val.country
+            }
+        })));
         return json.data;
     };
 };

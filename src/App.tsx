@@ -11,6 +11,8 @@ import { fetchThunk } from './modules/common/redux/thunk';
 import { RESPONSE_STATUS_SUCCESS } from './ultis/httpResponseCode';
 import { Routes } from './Routes';
 import { setUserInfo } from './modules/auth/redux/Action';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 
 function App() {
@@ -36,7 +38,9 @@ function App() {
 
   return (
     <>
-      <Routes />
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Routes />
+      </LocalizationProvider>
     </>
   );
 }
