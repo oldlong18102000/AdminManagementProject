@@ -75,7 +75,6 @@
 
 .table_value {
   height: min-content;
-
 }
 
 
@@ -91,6 +90,21 @@
   padding: 7px 16px;
   font-size: 14px;
   color: black;
+}
+
+.table_value span {
+  width: 100%;
+  padding: 0px;
+  font-size: 14px;
+  color: white;
+  text-align: top;
+}
+
+.table_value a {
+  width: 100%;
+  padding: 0px;
+  font-size: 14px;
+  text-align: top;
 }
 
 .table_value_editor {
@@ -117,7 +131,7 @@
 
 .mb_5,
 .my_5 {
-  margin-bottom: 3rem !important;
+  margin-bottom: 8px !important;
 }
 
 .mb_4,

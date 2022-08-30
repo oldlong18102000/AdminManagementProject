@@ -77,7 +77,8 @@ export const fetchAPIgetCountry = () => {
         dispatch(setCountry(json.data.map((val: any) => {
             return {
                 id: val.id,
-                country: val.country
+                country: val.country,
+                code: val.code,
             }
         })));
         return json.data;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './scss/TableProduct.css'
 import '@fortawesome/fontawesome-free/css/all.min.css';

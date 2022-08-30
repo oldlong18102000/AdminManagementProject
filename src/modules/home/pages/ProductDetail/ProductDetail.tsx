@@ -181,9 +181,6 @@ const DetailProduct = () => {
     };
 
     const handleAddShipping = () => {
-        // setState((prevFields) => (
-        //     { ...prevFields, Shipping: [...prevFields.Shipping, {}] }
-        // ))
         SetCountry([...Country, option]);
         setOption('');
     }
@@ -477,7 +474,7 @@ const DetailProduct = () => {
                             <label className={` ${styles.col_md_2}`}>{item.zone_name}<span hidden={item.zone_name != 'Continental U.S.'} className={`${styles.text_danger}`}>*</span></label>
                             <div className={` ${styles.col_md_4}`}>
                                 <div className={` ${styles.table_value}`}>
-                                    <input type="number" min={0} id='Shipping' value={take_decimal_number(item.price, 2)} placeholder='0.00' onChange={(e) =>
+                                    <input type="number" min={0} id='Shipping' value={item.price} placeholder='0.00' onChange={(e) =>
                                         setState((prevFields) => (
                                             {
                                                 ...prevFields,

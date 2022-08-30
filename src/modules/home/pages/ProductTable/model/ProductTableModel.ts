@@ -41,6 +41,7 @@ export interface IListBrand {
 export interface IListCountry {
     id: string;
     country: string;
+    code: string;
 }
 
 export interface Props {

@@ -7,6 +7,8 @@ import ProtectedRoute from './modules/common/components/ProtectedRoute';
 const HomePage = lazy(() => import('./modules/home/pages/HomePage'));
 const ProductTablePage = lazy(() => import('./modules/home/pages/ProductTable/ProductTable'));
 const ProductDetailPage = lazy(() => import('./modules/home/pages/ProductDetail/ProductDetail'));
+const UserTablePage = lazy(() => import('./modules/home/pages/UserTable/UserTable'));
+const UserDetailPage = lazy(() => import('./modules/home/pages/UserDetail/UserDetail'));
 const Header = lazy(() => import('./modules/common/components/Header'));
 const LoginPage = lazy(() => import('./modules/auth/pages/LoginPage'));
 const SignUpPage = lazy(() => import('./modules/auth/pages/SignUpPage'));
@@ -22,7 +24,9 @@ export const Routes = (props: Props) => {
         <HomeRoute path={ROUTES.login} component={LoginPage} />
         <HomeRoute path={ROUTES.signUp} component={SignUpPage} />
         <ProtectedRoute path={ROUTES.productTable}><Header /><ProductTablePage /></ProtectedRoute>
+        <ProtectedRoute path={ROUTES.userTable}><Header /><UserTablePage /></ProtectedRoute>
         <ProtectedRoute exact path={ROUTES.productDetail}><Header /><ProductDetailPage /></ProtectedRoute>
+        <ProtectedRoute exact path={ROUTES.userDetail}><Header /><UserDetailPage /></ProtectedRoute>
         <ProtectedRoute path={ROUTES.home} component={HomePage} />
         <HomeRoute exact path="/" component={LoginPage} />
         <Route path="*" component={NotFoundPage} />

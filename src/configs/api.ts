@@ -1,4 +1,4 @@
-import { APIHost, APIHost2 } from "../ultis/constants";
+import { APIHost, APIHost2, APIHostVendor } from "../ultis/constants";
 
 enum APIService {
   auth,
@@ -8,6 +8,8 @@ enum APIService {
   product,
   deleteProduct,
   productDetail,
+  user,
+  userDetail
 }
 
 function getBaseUrl(service: APIService) {
@@ -25,6 +27,10 @@ function getBaseUrl(service: APIService) {
     return `${APIHost2}/products`;
   } else if (service === APIService.deleteProduct) {
     return `${APIHost2}/products`;
+  } else if (service === APIService.user) {
+    return `${APIHost2}/users`;
+  } else if (service === APIService.userDetail) {
+    return `${APIHostVendor}/profile`;
   }
 
   return '';
@@ -43,4 +49,7 @@ export const API_PATHS = {
   getProductListData: `${getBaseUrl(APIService.product)}/list`,
   getProductDetailData: `${getBaseUrl(APIService.productDetail)}/detail`,
   deleteProductData: `${getBaseUrl(APIService.deleteProduct)}/edit`,
+  getUserListData: `${getBaseUrl(APIService.user)}/list`,
+  getUserDetailData: `${getBaseUrl(APIService.userDetail)}/detail`,
+  deleteUserData: `${getBaseUrl(APIService.user)}/edit`,
 };
