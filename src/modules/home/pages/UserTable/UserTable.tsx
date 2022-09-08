@@ -58,8 +58,8 @@ const UserList = () => {
     const [isShowModalConfirm, setIsShowModalConfirm] = useState(false);
     const [dataUserDelete, setDataUserDelete] = useState(Array<String>);
     const [dataDeleteLength, setDataDeleteLength] = useState(0);
-    const [HideMember, SetHideMenber] = useState(false);
-    const [HideUserType, SetHideUserType] = useState(false);
+    const [HideMember, SetHideMenber] = useState(true);
+    const [HideUserType, SetHideUserType] = useState(true);
     const [hideSearchBox, setHideSearchBox] = useState(true);
     const [OnOff, SetOnOff] = useState(true);
     const [DateType, SetDateType] = useState("R");
@@ -273,10 +273,10 @@ const UserList = () => {
                         </div>
                     </li>
                     <li className="memberships-codition">
-                        <select name="memberships" id="memberships" defaultValue={'All memberships'} onClick={() => SetHideMenber(!HideMember)}>
+                        <select name="memberships" id="memberships" defaultValue={'All memberships'} onClick={() => SetHideMenber(!HideMember)} onBlur={() => SetHideMenber(!HideMember)}>
                             <option value="0" style={{ display: 'none' }}>All memberships</option>
                         </select>
-                        <div className="search-membership-value" style={{ ...HideMember ? { display: '' } : { display: 'none' } }}>
+                        <div className="search-membership-value" hidden={HideMember}>
                             <label>Memberships</label><br />
                             <input type='checkbox' name='membership' value='"M_4"' onChange={handleChange} />
                             <label htmlFor='gen1'>General</label><br />
@@ -286,10 +286,10 @@ const UserList = () => {
                         </div>
                     </li>
                     <li className="memberships-codition">
-                        <select name="memberships" id="memberships" defaultValue={'All memberships'} onClick={() => SetHideUserType(!HideUserType)}>
+                        <select name="memberships" id="memberships" defaultValue={'All memberships'} onClick={() => SetHideUserType(!HideUserType)} onBlur={() => SetHideMenber(!HideMember)}>
                             <option value="0" style={{ display: 'none' }}>All user types</option>
                         </select>
-                        <div className="search-user-types-value" style={{ ...HideUserType ? { display: '' } : { display: 'none' } }}>
+                        <div className="search-user-types-value" hidden={HideUserType}>
                             <label>Memberships</label><br />
                             <input type='checkbox' name='usertype' value='"1"' onChange={handleChange} />
                             <label htmlFor='gen1'>Administrator</label><br />
@@ -388,7 +388,7 @@ const UserList = () => {
                     : null}
             </div>
             <div className="actions">
-                <Link to="/user/new-user"><button type='submit' className='btn-default'>Add User</button></Link>
+                <Link to="/pages/user/new-user"><button type='submit' className='btn-default'>Add User</button></Link>
             </div>
             <Table handleSort={handleSort} UserList={UserList} handleSetDeleteList={handleSetDeleteList} />
 

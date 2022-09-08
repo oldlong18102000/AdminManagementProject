@@ -8,15 +8,19 @@ import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import AsyncSelect from 'react-select/async'
 import draftToHtml from 'draftjs-to-html';
-import { EditorState } from "draft-js"
+import { EditorState, convertToRaw, ContentState, convertFromHTML } from "draft-js"
 import { AppState } from '../../../../redux/reducer';
-import { IListVendors } from './model/ProductDetailModel';
+import { IListCategories, IListVendors, IProductDetailParams } from '../ProductDetail/model/ProductDetailModel';
 import { ThunkDispatch } from 'redux-thunk';
 import { Action } from 'typesafe-actions';
 import { fetchProductDetailData } from './redux/Action';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Checkbox, TextField } from '@mui/material';
 import { DesktopDatePicker } from '@mui/x-date-pickers';
+import { OperationCanceledException, preProcessFile } from 'typescript';
+import { includes, map } from 'lodash';
+import { setCountry } from '../../../../services/Action';
+import { object } from 'yup';
 
 const initData = {
     ProductTitle: "",
@@ -31,7 +35,7 @@ const initData = {
     search_type: ""
 }
 
-const DetailProduct = () => {
+const NewProduct = () => {
     const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
     let currentUrl = window.location.pathname
     let result = currentUrl.lastIndexOf("/");
@@ -43,7 +47,7 @@ const DetailProduct = () => {
 
     const [selectedValue, SetSelectedValue] = useState(null);
     const [Vendor, setVendor] = useState("");
-    const [inputValue, setInputValue] = useState<IListVendors | null>({ name: '', id: '', });
+    const [inputValue, setInputValue] = useState<IListVendors | null>();
     const [ProductTitle, setProductTitle] = useState("");
     //const [Brand, SetBrand] = useState("");
     const [Ima, setIma] = useState([]);
@@ -71,7 +75,7 @@ const DetailProduct = () => {
         SKU: initSku,
         imageList: [{ thumbs: '', file: [] as any[] }],
         Category: [{ id: "", name: "" }],
-        ArrivalDate: 165000000,
+        ArrivalDate: new Date().getTime(),
         Avai4Sale: 1,
         TaxExempt: 0,
         Price: 0,
@@ -106,54 +110,6 @@ const DetailProduct = () => {
             }))
         }
     }
-    const getProductDeltailData = async () => {
-        const res = await dispatch(fetchProductDetailData(idProduct))
-        const datas = res.data
-        setVendor(datas.vendor_id)
-        setProductTitle(datas.name)
-        SetCountry(datas.shipping.map((val: any) => (val.zone_name)))
-        setState((prevFields) => ({
-            ...prevFields,
-            Vendor: datas.vendor_id,
-            ProductTitle: datas.name,
-            Brand: datas.brand_id,
-            Condition: datas.condition_id,
-            //editorState: EditorState.createWithContent(ContentState.createFromBlockArray(convertFromHTML(datas.description).contentBlocks)),
-            SKU: +datas.sku,
-            imageList: datas.images,
-            Category: datas.categories.map((val: any) => ({ id: val.category_id, name: val.name })),
-            ArrivalDate: +datas.arrival_date * 1000,
-            Avai4Sale: +datas.enabled,
-            TaxExempt: +datas.tax_exempt,
-            Price: +datas.price,
-            participate_sale: +datas.participate_sale,
-            sale_price_type: datas.sale_price_type,
-            sale_price: datas.sale_price,
-            Quantity: +datas.quantity,
-            Shipping: datas.shipping,
-            OgTtagsType: datas.og_tags_type,
-            OgTags: datas.og_tags,
-            MetaDescType: datas.meta_desc_type,
-            MetaDescription: datas.meta_description,
-            MetaKeywords: datas.meta_keywords,
-            ProductPageTitle: datas.product_page_title,
-            FacebookMarketingEnabled: +datas.facebook_marketing_enabled,
-            GoogleFeedEnabled: +datas.google_feed_enabled,
-        }))
-        let initialvalue = listVendors.filter(function (item) {
-            return item.id == datas.vendor_id
-        })
-        if (initialvalue[0]) {
-            setInputValue(Object.assign({}, initialvalue[0]))
-        }
-        console.log('@@', datas.categories.map((val: any) => {
-            return val.name
-        }))
-    }
-
-    useEffect(() => {
-        getProductDeltailData();
-    }, [])
 
     const take_decimal_number = (num: number, n: number) => {
         const index = String(num).indexOf('.', 0);
@@ -594,24 +550,11 @@ const DetailProduct = () => {
             </div>
             <div className="sticky-panel">
                 <div className="sticky-panel-content">
-                    <li><button type="button" className="btn btn-warning" disabled={+dataDeleteLength === 0 ? true : false}>Update Product</button></li>
+                    <li><button type="button" className="btn btn-warning" disabled={+dataDeleteLength === 0 ? true : false}>Add Product</button></li>
                 </div>
             </div>
         </div >
     );
 }
 
-export default DetailProduct
-
-// defaultValue={take_decimal_number(+Shipping.filter(item => item.id === '1')[0]?.price, 2)} onChange={e => setShipping(prevState => {
-//     const newState = prevState.map(obj => {
-//         if (obj.id === "1") {
-//             return { ...obj, price: `${e.target.value}` };
-//         }
-//         return obj;
-//     });
-
-//     return newState;
-
-// })
-// } autoComplete='off' maxLength={20}>
+export default NewProduct

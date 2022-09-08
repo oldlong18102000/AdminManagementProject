@@ -1,3 +1,5 @@
+import { StringLiteral } from "typescript";
+
 export interface IProductDetailParams {
     brand_id: string;
     name: string;
@@ -59,3 +61,19 @@ export interface IListCountry {
     id: string;
     country: string;
 }
+
+export interface IUpdateUserParams {
+    email: string;
+    firstName: string;
+    lastName: String;
+    password: string;
+    confirm_password: string;
+    membership_id: string;
+    forceChangePassword: number;
+    taxExempt: number;
+    id: string;
+    roles: number[];
+    status: string;
+    statusComment: string;
+}
+

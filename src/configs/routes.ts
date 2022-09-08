@@ -12,6 +12,8 @@ export const ROUTES = {
   productDetail: '/products/product-detail/:id',
   userDetail: '/user/user-detail/:id',
   userTable: '/user/manage-user',
+  newUser: '/pages/user/new-user',
+  newProduct: '/pages/products/new-product',
   login: '/login',
   signUp: '/sign-up',
 };

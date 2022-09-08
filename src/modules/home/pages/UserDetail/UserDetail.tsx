@@ -1,86 +1,98 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from "axios";
+import '../ProductTable/scss/TableProduct.css'
 import styles from './scss/NewUser.module.css';
 import 'antd/dist/antd.css';
 import { ThunkDispatch } from 'redux-thunk';
 import { AppState } from '../../../../redux/reducer';
 import { Action } from 'redux';
 import { useDispatch } from 'react-redux';
-import { fetchUserDetailData } from './redux/Action';
+import { fetchUpdateProduct, fetchUserDetailData } from './redux/Action';
+import { Autocomplete, Checkbox, TextField } from '@mui/material';
+import { IRoleParams } from '../NewUser/model/NewUserModel';
+import { replace } from 'connected-react-router';
+import { ROUTES } from '../../../../configs/routes';
+
+const listRoles = [
+    { label: 'Administrator', role: "1" },
+    { label: 'Coupons management', role: "2" },
+    { label: 'Content management', role: "3" },
+    { label: 'Volume discounts managenment', role: "4" },
+    { label: 'Vendor', role: "5" },
+    { label: 'View order reports', role: "6" },
+]
+
+const initData = {
+    vendorIncome: "",
+    vendorExpense: "",
+    earning: "",
+    orderAsBuyer: { quantity: 0, total: "0.00" },
+    productTotal: "",
+    companyName: "",
+    joined: "",
+    lastLogin: "",
+    language: "",
+    referer: "",
+    paymentType: "",
+    paymentId: "",
+    accessLevel: "10",
+    role: [] as IRoleParams[],
+    status: "E",
+    statusComment: "",
+    pending: "",
+    forceChangePassword: 0,
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "",
+    cfPassword: "",
+    membership: "4",
+    Type: "individual",
+    taxExempt: 0,
+}
 
 const DetailUser = () => {
     const dispatch = useDispatch<ThunkDispatch<AppState, null, Action<string>>>();
     let currentUrl = window.location.pathname
     let result = currentUrl.lastIndexOf("/");
     let idUser = currentUrl.slice(result + 1, currentUrl.length)
-    const [CompanyName, setCompanyName] = useState("");
-    const [OrderAsBuyer, setOrderAsBuyer] = useState({ quantity: 0, total: "0.00" });
-    const [VendorIncome, setVendorIncome] = useState("");
-    const [VendorExpense, setVendorExpense] = useState("");
-    const [Earning, setEarning] = useState("");
-    const [ProductTotal, setProductTotal] = useState("");
-    const [Joined, setJoined] = useState("");
-    const [LastLogin, setLastLogin] = useState("");
-    const [Language, setLanguage] = useState("");
-    const [Referer, setReferer] = useState("");
-    const [PaymentType, setPaymentType] = useState("");
-    const [PaymentId, setPaymentId] = useState("");
-    const [AccessLevel, setAccessLevel] = useState("10");
-    const [Status, setStatus] = useState("E");
-    const [Pending, setPending] = useState("");
-    const [ForceChangePassword, setForceChangePassword] = useState(0);
+    const [orderAsBuyer, setOrderAsBuyer] = useState({ quantity: 0, total: "0.00" });
+    const [pending, setPending] = useState("");
 
-    const [Email, setEmail] = useState("");
-    const [FirstName, setFirstName] = useState("");
-    const [LastName, setLastName] = useState("");
-    const [Password, setPassword] = useState("");
-    const [CfPassword, setCfPassword] = useState("");
-    const [Membership, setMembership] = useState("4");
-    const [Type, setType] = useState("individual");
-    const [TaxExempt, setTaxExempt] = useState(0);
-
-    const dataDeleteLength = 1;
+    const [state, setState] = useState(initData)
 
     const getUserDeltailData = async () => {
-        //const res = await axios.post
-        // const res = await axios.post('https://api.gearfocus.div4.pgtest.co/apiVendor/profile/detail',
-        //     `{"id":"${idUser}"}`
-        //     ,
-        //     {
-        //         headers: {
-        //             Authorization: '9.5a8eefea2a1299f87e8e1a74994827840debf897a605c603444091fa519da275',
-        //         }
-        //     }
-        // )
         const res = await dispatch(fetchUserDetailData(idUser))
         console.log(res)
-        console.log(res.data.data.info)
-        const info = res.data.data.info
-        setCompanyName(info.companyName)
-        setOrderAsBuyer({ ...OrderAsBuyer, quantity: info.order_as_buyer, total: info.order_as_buyer_total })
-        setVendorIncome(info.income)
-        setVendorExpense(info.expense)
-        setEarning(info.earning)
-        setProductTotal(info.products_total)
-        setJoined(new Date(info.joined * 1000).toLocaleString("en-VN", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", hour12: true }))
-        setLastLogin(new Date(info.last_login * 1000).toLocaleString("en-VN", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", hour12: true }))
-        setLanguage(info.language)
-        setReferer(info.referer)
-
-        setFirstName(info.firstName)
-        setLastName(info.lastName)
-        setEmail(info.email)
-        setPaymentType(info.paymentRailsType)
-        setPaymentId(info.paymentRailsId)
-
-        setAccessLevel(info.access_level)
-        setStatus(info.status)
-        setMembership(info.membership_id ? info.membership_id : '')
-        setPending(info.pending_membership_id)
-        setForceChangePassword(+info.forceChangePassword)
-        setTaxExempt(+info.taxExempt)
-
+        console.log(res.data.info)
+        const info = res.data.info
+        setState((prevFields) => ({
+            ...prevFields,
+            companyName: info.companyName,
+            orderAsBuyer: { ...prevFields.orderAsBuyer, quantity: info.order_as_buyer, total: info.order_as_buyer_total },
+            vendorIncome: info.income,
+            vendorExpense: info.expense,
+            earning: info.earning,
+            productTotal: info.products_total,
+            joined: new Date(info.joined * 1000).toLocaleString("en-VN", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", hour12: true }),
+            lastLogin: new Date(info.last_login * 1000).toLocaleString("en-VN", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "numeric", hour12: true }),
+            language: info.language,
+            referer: info.referer,
+            firstName: info.firstName,
+            lastName: info.lastName,
+            email: info.email,
+            paymentType: info.paymentRailsType,
+            paymentId: info.paymentRailsId,
+            accessLevel: info.access_level,
+            role: info?.roles.map((val: string) => listRoles.filter((roles) => val == roles.role)[0]),
+            status: info.status,
+            statusComment: info.statusComment,
+            membership: info.membership_id ? info.membership_id : '',
+            pending: info.pending_membership_id,
+            forceChangePassword: +info.forceChangePassword,
+            taxExempt: +info.taxExempt,
+        }))
     }
 
     useEffect(() => {
@@ -93,6 +105,45 @@ const DetailUser = () => {
         return result;
     }
 
+    const onChange = (ev: any) => {
+        const target = ev.target;
+        const id = target.id;
+        const value =
+            target.type === "checkbox" ? Number(target.checked) : target.value;
+        setState((prevFields) => ({
+            ...prevFields,
+            [id]: value,
+        }))
+        if (target.type === "checkbox" && id == 'participate_sale' && target.checked == false) {
+            setState((prevFields) => ({
+                ...prevFields,
+                sale_price: 0,
+            }))
+        }
+    }
+
+    const updateUser = async () => {
+        const stateAPI = {
+            "email": state.email,
+            "firstName": state.firstName,
+            "lastName": state.lastName,
+            "password": state.password,
+            "confirm_password": state.cfPassword,
+            "membership_id": state.membership,
+            "forceChangePassword": state.forceChangePassword,
+            "taxExempt": state.taxExempt,
+            "id": idUser,
+            "roles": state.role.map(val => +val.role),
+            "status": state.status,
+            "statusComment": state.statusComment,
+        }
+        const res = await dispatch(fetchUpdateProduct(stateAPI))
+        console.log('res', res)
+        res.success === false ?
+            console.log('error', res.error) :
+            dispatch(replace(ROUTES.userTable))
+    }
+
     return (
         <div className="padding-left-293">
             <Link to="/user/manage-user">
@@ -101,13 +152,13 @@ const DetailUser = () => {
                 </button>
             </Link>
             <div className={styles.part1}>
-                <h2 className={` ${styles.nb_theme_cosmic} ${styles.mb_5}`}>{Email} ({CompanyName})</h2>
+                <h2 className={` ${styles.nb_theme_cosmic} ${styles.mb_5}`}>{state.email} ({state.companyName})</h2>
                 {/* Orders placed as a buyer */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
                     <label className={` ${styles.col_md_3}`}>Orders placed as a buyer</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span style={{ color: '#007bff' }}>{OrderAsBuyer.quantity}</span><span> (${take_decimal_number(+OrderAsBuyer.total, 2)})</span>
+                            <span style={{ color: '#007bff' }}>{orderAsBuyer.quantity}</span><span> (${take_decimal_number(+state.orderAsBuyer.total, 2)})</span>
                         </div>
                     </div>
                 </div>
@@ -116,7 +167,7 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Vendor Income</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>${VendorIncome}</span>
+                            <span>${state.vendorIncome}</span>
                         </div>
                     </div>
                 </div>
@@ -125,7 +176,7 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Vendor Expense</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>${VendorExpense}</span>
+                            <span>${state.vendorExpense}</span>
 
                         </div>
                     </div>
@@ -138,12 +189,12 @@ const DetailUser = () => {
                         </div>
                     </div>
                 </div>
-                {/* Earning balance */}
+                {/* earning balance */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
-                    <label className={` ${styles.col_md_3}`}>Earning balance</label>
+                    <label className={` ${styles.col_md_3}`}>earning balance</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>${Earning}</span>
+                            <span>${state.earning}</span>
                         </div>
                     </div>
                 </div>
@@ -152,16 +203,16 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Products listed as vendor</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <a href='#'>{ProductTotal}</a>
+                            <a href='#'>{state.productTotal}</a>
                         </div>
                     </div>
                 </div>
-                {/* Joined */}
+                {/* joined */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
-                    <label className={` ${styles.col_md_3}`}>Joined</label>
+                    <label className={` ${styles.col_md_3}`}>joined</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>{Joined}</span>
+                            <span>{state.joined}</span>
                         </div>
                     </div>
                 </div>
@@ -170,25 +221,25 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Last login</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>{LastLogin}</span>
+                            <span>{state.lastLogin}</span>
                         </div>
                     </div>
                 </div>
-                {/* Language */}
+                {/* language */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
-                    <label className={` ${styles.col_md_3}`}>Language</label>
+                    <label className={` ${styles.col_md_3}`}>language</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>{Language}</span>
+                            <span>{state.language}</span>
                         </div>
                     </div>
                 </div>
-                {/* Referer */}
+                {/* referer */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
-                    <label className={` ${styles.col_md_3}`}>Referer</label>
+                    <label className={` ${styles.col_md_3}`}>referer</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>{Referer}</span>
+                            <span>{state.referer}</span>
                         </div>
                     </div>
                 </div>
@@ -201,8 +252,8 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>First Name<span className={`${styles.text_danger}`}>*</span></label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="text" defaultValue={FirstName} onChange={e => setFirstName(e.target.value)} autoComplete='off' maxLength={255}></input>
-                            {FirstName === '' ?
+                            <input type="text" id='firstName' value={state.firstName} onChange={onChange}></input>
+                            {state.firstName === '' ?
                                 <div className={`${styles.small} ${styles.error_message}`}>This field is required</div>
                                 : null}
                         </div>
@@ -213,8 +264,8 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Last Name<span className={`${styles.text_danger}`}>*</span></label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="text" defaultValue={LastName} onChange={e => setLastName(e.target.value)} autoComplete='off' maxLength={255}></input>
-                            {LastName === '' ?
+                            <input type="text" id='lastName' value={state.lastName} onChange={onChange}></input>
+                            {state.lastName === '' ?
                                 <div className={`${styles.small} ${styles.error_message}`}>This field is required</div>
                                 : null}
                         </div>
@@ -225,8 +276,8 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Email<span className={`${styles.text_danger}`}>*</span></label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="text" defaultValue={Email} onChange={e => setEmail(e.target.value)} autoComplete='off' maxLength={255}></input>
-                            {Email === '' ?
+                            <input type="text" id='email' value={state.email} onChange={onChange}></input>
+                            {state.email === '' ?
                                 <div className={`${styles.small} ${styles.error_message}`}>This field is required</div>
                                 : null}
                         </div>
@@ -237,7 +288,7 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Password</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="password" onChange={e => setPassword(e.target.value)} autoComplete='off' maxLength={255}></input>
+                            <input type="password" id='password' value={state.password} onChange={onChange}></input>
                         </div>
                     </div>
                 </div>
@@ -246,8 +297,8 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Confirm password</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="password" onChange={e => setCfPassword(e.target.value)} autoComplete='off' maxLength={255}></input>
-                            {CfPassword !== Password ?
+                            <input type="password" id='cfPassword' value={state.cfPassword} onChange={onChange}></input>
+                            {state.cfPassword !== state.password ?
                                 <div className={`${styles.small} ${styles.error_message}`}>Passwords do not match</div>
                                 : null}
                         </div>
@@ -258,7 +309,7 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Type</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>{PaymentType}</span>
+                            <span>{state.paymentType}</span>
                         </div>
                     </div>
                 </div>
@@ -267,7 +318,7 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>PaymentRails ID</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>{PaymentId}</span>
+                            <span>{state.paymentId}</span>
                         </div>
                     </div>
                 </div>
@@ -280,7 +331,36 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Access level</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>{AccessLevel === "100" ? "Administrator" : "Vendor"}</span>
+                            <span>{state.accessLevel === "100" ? "Administrator" : "Vendor"}</span>
+                        </div>
+                    </div>
+                </div>
+                {/* Roles */ console.log('role', state.role)}
+                <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`} hidden={state.accessLevel !== '100'}>
+                    <label className={` ${styles.col_md_3}`}>Roles</label>
+                    <div className={` ${styles.col_md_4}`}>
+                        <div className={styles.table_value}>
+                            <Autocomplete
+                                multiple
+                                id="checkboxes-tags-demo"
+                                options={listRoles}
+                                disableCloseOnSelect
+                                getOptionLabel={(option) => option.label}
+                                value={state.role}
+                                onChange={(event, newValue) => setState((prevFields) => ({
+                                    ...prevFields,
+                                    role: newValue,
+                                }))}
+                                renderOption={(props, option, { selected }) => (
+                                    <li {...props}>
+                                        <Checkbox checked={selected} />
+                                        {option.label}
+                                    </li>
+                                )}
+                                renderInput={(params) => (
+                                    <TextField {...params} />
+                                )}
+                            />
                         </div>
                     </div>
                 </div>
@@ -289,7 +369,7 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Account status<span className={`${styles.text_danger}`}>*</span></label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <select name="Membership" id="Membership" onChange={e => setMembership(e.target.value)} value={Status}>
+                            <select name="status" id="status" value={state.status} onChange={onChange}>
                                 <option value="E">Enable</option>
                                 <option value="D">Disable</option>
                                 <option value="U">Unapproved Vendor</option>
@@ -297,33 +377,33 @@ const DetailUser = () => {
                         </div>
                     </div>
                 </div>
-                {/* Status comment (reason) */}
+                {/* status comment (reason) */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
-                    <label className={` ${styles.col_md_3}`}>Status comment (reason)</label>
+                    <label className={` ${styles.col_md_3}`}>status comment (reason)</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <textarea style={{ width: '100%', minHeight: '64px', color: 'black', fontSize: '14px' }}></textarea>
+                            <textarea name='statusComment' id='statusComment' value={state.statusComment} onChange={onChange} style={{ width: '100%', minHeight: '64px', color: 'black', fontSize: '14px' }}></textarea>
                         </div>
                     </div>
                 </div>
-                {/* Membership */}
+                {/* membership */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
-                    <label className={` ${styles.col_md_3}`}>Membership</label>
+                    <label className={` ${styles.col_md_3}`}>membership</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <select name="Membership" id="Membership" onChange={e => setMembership(e.target.value)} value={Membership}>
-                                <option value=''>Ignore Membership</option>
+                            <select name="membership" id="membership" value={state.membership} onChange={onChange}>
+                                <option value=''>Ignore membership</option>
                                 <option value="4">General</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                {/* Pending membership */}
+                {/* pending membership */}
                 <div className={`${styles.form_group} ${styles.nb_theme_cosmic} ${styles.row_inline} ${styles.mb_4}`}>
                     <label className={` ${styles.col_md_3}`}>Pending membership</label>
                     <div className={` ${styles.col_md_4}`}>
                         <div className={` ${styles.table_value}`}>
-                            <span>{Pending === null ? "None" : Pending}</span>
+                            <span>{state.pending === null ? "None" : pending}</span>
                         </div>
                     </div>
                 </div>
@@ -332,7 +412,7 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Require to change password on next log in</label>
                     <label className={` ${styles.col_md_3}`} style={{ textAlign: 'left' }}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="checkbox" checked={Boolean(ForceChangePassword)} onChange={e => setForceChangePassword(Number(e.target.checked))}></input>
+                            <input type="checkbox" id='forceChangePassword' checked={Boolean(state.forceChangePassword)} onChange={onChange}></input>
                         </div>
                     </label>
                 </div>
@@ -345,14 +425,14 @@ const DetailUser = () => {
                     <label className={` ${styles.col_md_3}`}>Tax exempt</label>
                     <label className={` ${styles.col_md_3}`} style={{ textAlign: 'left' }}>
                         <div className={` ${styles.table_value}`}>
-                            <input type="checkbox" checked={Boolean(TaxExempt)} onChange={e => setTaxExempt(Number(e.target.checked))}></input>
+                            <input type="checkbox" id='taxExempt' checked={Boolean(state.taxExempt)} onChange={onChange}></input>
                         </div>
                     </label>
                 </div>
             </div>
             <div className="sticky-panel">
                 <div className="sticky-panel-content">
-                    <li><button type="button" className="btn btn-warning"
+                    <li><button type="button" className="btn btn-warning" onClick={updateUser}
                         disabled={false}>Update</button></li>
                 </div>
             </div>

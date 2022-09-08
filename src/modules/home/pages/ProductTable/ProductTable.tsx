@@ -235,7 +235,7 @@ const ProductTable = () => {
           </div>
         </div>
         <div className="actions">
-          <Link to="/products/new-product"><button type='submit' className='btn-default'>Add Product</button></Link>
+          <Link to="/pages/products/new-product"><button type='submit' className='btn-default'>Add Product</button></Link>
         </div>
         <Table handleSort={handleSort} ProductList={ProductList} handleSetDeleteList={handleSetDeleteList} />
         <div className="pagination-bar">

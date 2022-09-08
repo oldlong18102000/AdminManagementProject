@@ -49,6 +49,8 @@ export const API_PATHS = {
   getProductListData: `${getBaseUrl(APIService.product)}/list`,
   getProductDetailData: `${getBaseUrl(APIService.productDetail)}/detail`,
   deleteProductData: `${getBaseUrl(APIService.deleteProduct)}/edit`,
+  createNewUserData: `${getBaseUrl(APIService.user)}/create`,
+  updateUserData: `${getBaseUrl(APIService.user)}/edit`,
   getUserListData: `${getBaseUrl(APIService.user)}/list`,
   getUserDetailData: `${getBaseUrl(APIService.userDetail)}/detail`,
   deleteUserData: `${getBaseUrl(APIService.user)}/edit`,
